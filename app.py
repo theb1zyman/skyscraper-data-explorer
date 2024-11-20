@@ -35,27 +35,33 @@ filtered_df = skyscrapers_df[
 
 # Display filtered data
 st.subheader(f"Skyscrapers in {city} made of {material} with at least {min_floors} floors")
-st.write(filtered_df[['name', 'statistics.floors above', 'statistics.height', 'location.city']])
+if filtered_df.empty:
+    st.write("No skyscrapers found that match your criteria.")
+else:
+    st.write(filtered_df[['name', 'statistics.floors above', 'statistics.height', 'location.city']])
 
-# Create a map of the filtered skyscrapers
-st.subheader("Skyscraper Locations on Map")
-map_data = filtered_df[['location.latitude', 'location.longitude']]
-st.pydeck_chart(pdk.Deck(
-    initial_view_state=pdk.ViewState(
-        latitude=map_data['location.latitude'].mean(),
-        longitude=map_data['location.longitude'].mean(),
-        zoom=11
-    ),
-    layers=[
-        pdk.Layer(
-            'ScatterplotLayer',
-            data=map_data,
-            get_position='[location.longitude, location.latitude]',
-            get_radius=2000,
-            get_fill_color=[255, 0, 0, 160],
-            pickable=True
-        )
-    ]
-))
+    # Create a map of the filtered skyscrapers
+    st.subheader("Skyscraper Locations on Map")
+    map_data = filtered_df[['location.latitude', 'location.longitude']]
 
-# Additional charts or statistics can be added here.
+    # Check if there is any data to display on the map
+    if not map_data.empty:
+        st.pydeck_chart(pdk.Deck(
+            initial_view_state=pdk.ViewState(
+                latitude=map_data['location.latitude'].mean(),
+                longitude=map_data['location.longitude'].mean(),
+                zoom=11
+            ),
+            layers=[
+                pdk.Layer(
+                    'ScatterplotLayer',
+                    data=map_data,
+                    get_position='[location.longitude, location.latitude]',
+                    get_radius=2000,
+                    get_fill_color=[255, 0, 0, 160],
+                    pickable=True
+                )
+            ]
+        ))
+    else:
+        st.write("No data available to display on the map.")
