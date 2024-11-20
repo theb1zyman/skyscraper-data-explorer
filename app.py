@@ -42,26 +42,32 @@ else:
 
     # Create a map of the filtered skyscrapers
     st.subheader("Skyscraper Locations on Map")
-    map_data = filtered_df[['location.latitude', 'location.longitude']]
+    map_data = filtered_df[['name', 'location.latitude', 'location.longitude']]
 
     # Check if there is any data to display on the map
     if not map_data.empty:
+        # Create the map with individual location markers for each skyscraper
+        layers = [
+            pdk.Layer(
+                'ScatterplotLayer',
+                data=map_data,
+                get_position='[location.longitude, location.latitude]',
+                get_radius=2000,
+                get_fill_color=[255, 0, 0, 160],
+                pickable=True,
+                auto_highlight=True,
+                get_tooltip='name'
+            )
+        ]
+
+        # Set the map's initial view state based on the mean of the latitude and longitude
         st.pydeck_chart(pdk.Deck(
             initial_view_state=pdk.ViewState(
                 latitude=map_data['location.latitude'].mean(),
                 longitude=map_data['location.longitude'].mean(),
                 zoom=11
             ),
-            layers=[
-                pdk.Layer(
-                    'ScatterplotLayer',
-                    data=map_data,
-                    get_position='[location.longitude, location.latitude]',
-                    get_radius=2000,
-                    get_fill_color=[255, 0, 0, 160],
-                    pickable=True
-                )
-            ]
+            layers=layers
         ))
     else:
         st.write("No data available to display on the map.")
