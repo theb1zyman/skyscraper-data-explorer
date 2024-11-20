@@ -1,0 +1,61 @@
+import streamlit as st
+import pandas as pd
+import pydeck as pdk
+
+# Load the dataset
+skyscrapers_df = pd.read_csv('skyscrapers.csv')
+
+# Clean and preprocess the data
+skyscrapers_df = skyscrapers_df.dropna(subset=['location.latitude', 'location.longitude'])
+
+# Title and description
+st.title("Skyscraper Data Explorer")
+st.write("""
+This application provides an interactive exploration of skyscraper data. You can explore skyscrapers based on different attributes such as material, city, number of floors, and height.
+""")
+
+# Sidebar with widgets for user input
+st.sidebar.header("Filters")
+
+# Dropdown to select city
+city = st.sidebar.selectbox("Select a City", skyscrapers_df['location.city'].unique())
+
+# Dropdown to select material
+material = st.sidebar.selectbox("Select Material", skyscrapers_df['material'].unique())
+
+# Slider to filter by number of floors
+min_floors = st.sidebar.slider("Minimum number of floors", 1, int(skyscrapers_df['statistics.floors above'].max()), 1)
+
+# Filter data based on user input
+filtered_df = skyscrapers_df[
+    (skyscrapers_df['location.city'] == city) &
+    (skyscrapers_df['material'] == material) &
+    (skyscrapers_df['statistics.floors above'] >= min_floors)
+]
+
+# Display filtered data
+st.subheader(f"Skyscrapers in {city} made of {material} with at least {min_floors} floors")
+st.write(filtered_df[['name', 'statistics.floors above', 'statistics.height', 'location.city']])
+
+# Create a map of the filtered skyscrapers
+st.subheader("Skyscraper Locations on Map")
+map_data = filtered_df[['location.latitude', 'location.longitude']]
+st.pydeck_chart(pdk.Deck(
+    initial_view_state=pdk.ViewState(
+        latitude=map_data['location.latitude'].mean(),
+        longitude=map_data['location.longitude'].mean(),
+        zoom=11
+    ),
+    layers=[
+        pdk.Layer(
+            'ScatterplotLayer',
+            data=map_data,
+            get_position='[location.longitude, location.latitude]',
+            get_radius=2000,
+            get_fill_color=[255, 0, 0, 160],
+            pickable=True
+        )
+    ]
+))
+
+# Additional charts or statistics can be added here.
