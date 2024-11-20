@@ -34,11 +34,11 @@ filtered_df = skyscrapers_df[
 ]
 
 # Display filtered data
-st.subheader(f"Skyscrapers in {city} made of {material} with at least {min_floors} floors")
+st.subheader(f"Skyscrapers in {city} made of {material} with at least {min_floors} floor(s)")
 if filtered_df.empty:
     st.write("No skyscrapers found that match your criteria.")
 else:
-    st.write(filtered_df[['name', 'statistics.floors above', 'statistics.height', 'location.city']])
+    st.write(filtered_df[['Name', '# of Floors', 'Height (m)', 'City']])
 
     # Create a map of the filtered skyscrapers
     st.subheader("Skyscraper Locations on Map")
